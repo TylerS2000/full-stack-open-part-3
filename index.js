@@ -1,53 +1,14 @@
-require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors= require('cors')
 const app = express()
+const Number = require('./models/number')
+
 app.use(express.json())
 app.use(morgan('tiny',{skip:function(req,res){return res.statusCode>201}}))
 app.use(cors())
 app.use(express.static('build'))
-const mongoose = require ('mongoose');
 
-
-  
-  const url = process.env.MONGODB_URI
-  console.log(url)
-mongoose.connect(url)
-  const numberSchema = new mongoose.Schema({
-    id: String,
-    name: String,
-    number: String,
-  })
-  
-  const Number = mongoose.model('Number', numberSchema)
-let numbers =[
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    },
-    { 
-        "id": 5,
-        "name": "Mary Poppendieck", 
-        "number": "39-23-6423122"
-      }
-]
 
 
 app.get('/info',(req,res)=>{
