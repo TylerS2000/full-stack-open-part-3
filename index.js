@@ -4,6 +4,7 @@ const cors= require('cors')
 const app = express()
 const Number = require('./models/number')
 
+
 app.use(express.json())
 app.use(morgan('tiny',{skip:function(req,res){return res.statusCode>201}}))
 app.use(cors())
@@ -36,27 +37,22 @@ app.delete('/api/numbers/:id',(req,res)=>{
 })
 
 app.post('/api/numbers', (req,res)=>{
-  const number = req.body
+  const body = req.body
 
-  if(!number.name||!number.number){
+  if(!body.name||!body.number){
     return res.status(400).json({error:"name or number is missing"})
   }
-  for(let i = 0; i<numbers.length; i++){
-    if(numbers[i].name===number.name){
-      return res.status(400).json({error:"Name must be unique"})
-    }
-  }
 
-  const contact = {
-    name : number.name,
-    number:number.number,
-    id:Math.random(1000)
-  }
+  const number = new Number({
+    name : body.name,
+    number:body.number,
+    id: JSON.stringify(Math.random(1000))
+  })
 
-numbers=numbers.concat(contact)
-  res.json(numbers)
+  number.save().then(savedNumber => {
+  res.json(savedNumber)
 })
-
+})
 
 const PORT = process.env.PORT || 8080
 app.listen(PORT, () => {
