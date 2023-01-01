@@ -31,14 +31,17 @@ app.get('/api/numbers/:id',(req,res)=>{
 })
 
 app.delete('/api/numbers/:id',(req,res)=>{
-  const id= Number(req.params.id)
-  numbers=numbers.filter(number=>number.id!==id)
-  res.status(204).end()
+  Number.findByIdAndDelete(req.params.id)
+ .then(result=>{
+  res.status(204).end
+ })
 })
+
 
 app.post('/api/numbers', (req,res)=>{
   const body = req.body
 
+  if(body.name)
   if(!body.name||!body.number){
     return res.status(400).json({error:"name or number is missing"})
   }
