@@ -1,12 +1,12 @@
 const express = require('express')
-const morgan = require('morgan')
+//const morgan = require('morgan')
 const cors= require('cors')
 const app = express()
 const Number = require('./models/number')
 
 
 app.use(express.json())
-app.use(morgan('tiny',{skip:function(req,res){return res.statusCode>201}}))
+//app.use(morgan('tiny',{skip:function(req,res){return res.statusCode>201}}))
 app.use(cors())
 app.use(express.static('build'))
 
@@ -19,15 +19,23 @@ const errorHandler = (error, request, response, next) => {
 
   next(error)
 }
+let counts = 0
+Number.count({}, function(err, count){
+
+  console.log( "Number of docs: ", count );
+  counts=count
+});
 
 app.get('/info',(req,res)=>{
-    res.send(`Phonebook has info for ${numbers.length} people (request made at ${new Date})`)
+    res.send(`Phonebook has info for ${counts} people (request made at ${new Date})`)
     
 })
 
 app.get('/api/numbers',(req,res)=>{
+ 
     Number.find({}).then(number => {
     res.json(number)
+    
   })
 })
 
@@ -49,11 +57,16 @@ app.delete('/api/numbers/:id',(req,res)=>{
 app.post('/api/numbers', (req,res)=>{
   const body = req.body
 
-  if(body.name)
-  if(!body.name||!body.number){
-    return res.status(400).json({error:"name or number is missing"})
+ /*if(Number.find({name:body.name})){
+   return res.status(400).json({error:"name must be unique"})
+ }
+  */
+ console.log(body.name.length, body.number.length, body.name, body.number)
+  if(!body.name.length===0||!body.number.length===0){
+    res.status(400).json({error:"name or number is missing"})
   }
 
+  if (body.name.length!==0||body.number.length!==0){
   const number = new Number({
     name : body.name,
     number:body.number,
@@ -63,7 +76,7 @@ app.post('/api/numbers', (req,res)=>{
   number.save().then(savedNumber => {
   res.json(savedNumber)
 })
-})
+}})
 
 app.put('/api/numbers/:id',(req,res,next)=>{
   const body = req.body
