@@ -10,7 +10,15 @@ app.use(morgan('tiny',{skip:function(req,res){return res.statusCode>201}}))
 app.use(cors())
 app.use(express.static('build'))
 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
 
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
 
 app.get('/info',(req,res)=>{
     res.send(`Phonebook has info for ${numbers.length} people (request made at ${new Date})`)
@@ -23,11 +31,10 @@ app.get('/api/numbers',(req,res)=>{
   })
 })
 
-app.get('/api/numbers/:id',(req,res)=>{
-  const id = Number(req.params.id)
-  const number = numbers.find(contact=>contact.id===id)
-  console.log(number)
-  res.json(number)
+app.get('/api/numbers/:id',(req,res,next)=>{
+  Number.findById(req.params.id)
+  .then(number=>{res.json(number)})
+  .catch(error=>next(error))
 })
 
 app.delete('/api/numbers/:id',(req,res)=>{
@@ -35,8 +42,9 @@ app.delete('/api/numbers/:id',(req,res)=>{
  .then(result=>{
   res.status(204).end
  })
+ .catch(error=>next(error))
 })
-
+ 
 
 app.post('/api/numbers', (req,res)=>{
   const body = req.body
@@ -57,7 +65,22 @@ app.post('/api/numbers', (req,res)=>{
 })
 })
 
+app.put('/api/numbers/:id',(req,res,next)=>{
+  const body = req.body
+
+  const number = {
+    name:body.name,
+    number:body.number
+  }
+  Number.findByIdAndUpdate(req.params.id,number,{new:true})
+  .then(updatedNumber=>{
+    res.json(updatedNumber)
+  })
+  .catch(error=>next(error))
+})
+
 const PORT = process.env.PORT || 8080
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+app.use(errorHandler)
