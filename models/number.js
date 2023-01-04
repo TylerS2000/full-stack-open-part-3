@@ -1,3 +1,4 @@
+/* eslint-disable */
 require('dotenv').config()
 const mongoose = require('mongoose')
 
@@ -9,8 +10,10 @@ mongoose.connect(url)
 
 const numberSchema = new mongoose.Schema({
     id: String,
-    name: String,
-    number: String,
+    name: {type:String, minlength:3, required:true},
+    number: {type:String, minlength:12,validate:{validator: function(v) {
+        return /\d{3}-\d{3}-\d{4}/.test(v);
+      }, message:props=>`${props.value} is not a valid phone number`}, required:true}
 })
 
 numberSchema.set('toJSON', {transform: (document, returnedObject) => {
